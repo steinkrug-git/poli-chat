@@ -1,30 +1,28 @@
 package py.com.fpuna.service;
 
-import py.com.fpuna.model.common.Message;
-import py.com.fpuna.model.request.ChatGPTRequest;
-import py.com.fpuna.model.response.ChatGPTResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import py.com.fpuna.model.common.Message;
+import py.com.fpuna.model.request.ChatGPTRequest;
+import py.com.fpuna.model.response.ChatGPTResponse;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ChatGPTService {
 
     @Value("${openai.api.key}")
     private String apiKey;
 
+    private final RestTemplate restTemplate;
+
     private static final String OPEN_AI_CHAT_ENDPOINT = "https://api.openai.com/v1/chat/completions";
-
-    private RestTemplate restTemplate;
-
-    public ChatGPTService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     public ChatGPTResponse getChatCPTResponse(String prompt) {
 
@@ -33,11 +31,10 @@ public class ChatGPTService {
         headers.set("Authorization", "Bearer " + apiKey);
 
         ChatGPTRequest chatGPTRequest = new ChatGPTRequest();
-        chatGPTRequest.setModel("gpt-3.5-turbo");
+        chatGPTRequest.setModel("gpt-4");
         chatGPTRequest.setMessages(List.of(new Message("user", prompt)));
-        chatGPTRequest.setMax_tokens(20);
+        chatGPTRequest.setMax_tokens(100);
 
-        RestTemplate restTemplate = new RestTemplate();
         HttpEntity<ChatGPTRequest> request = new HttpEntity<>(chatGPTRequest, headers);
 
         return restTemplate.postForObject(OPEN_AI_CHAT_ENDPOINT, request, ChatGPTResponse.class);
