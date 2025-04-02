@@ -4,7 +4,7 @@ import py.com.fpuna.model.common.Message;
 
 import java.util.List;
 
-public class ChatGPTRequest {
+public class ChatRequest {
 
     private String model;
 
