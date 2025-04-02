@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatGPTResponse {
+public class ChatResponse {
 
     public String id;
     public String object;
@@ -13,7 +13,7 @@ public class ChatGPTResponse {
     public List<Choice> choices;
     public Usage usage;
 
-    public ChatGPTResponse() {
+    public ChatResponse() {
     }
 
     public String getId() {

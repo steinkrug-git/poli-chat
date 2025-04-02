@@ -8,11 +8,11 @@ import java.util.List;
 
 @Data
 @Document(collection = "conocimientos")
-public class Conocimiento {
+public class Knowledge {
     @Id
     private String id;
-    private String categoria;
-    private String titulo;
-    private String contenido;
+    private String category;
+    private String title;
+    private String content;
     private List<String> keywords;
 }

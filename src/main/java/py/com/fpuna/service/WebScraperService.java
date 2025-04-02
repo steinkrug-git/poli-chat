@@ -5,7 +5,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import py.com.fpuna.model.knowledge.Conocimiento;
+import py.com.fpuna.model.knowledge.Knowledge;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -20,7 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class WebScraperService {
 
-    private final ConocimientoService conocimientoService;
+    private final KnowledgeService knowledgeService;
 
     @Value("${csv.file.path}")
     private String csvFilePath;
@@ -32,22 +32,22 @@ public class WebScraperService {
                 "Carreras", "https://www.pol.una.py/carreras"
         );
 
-        sections.forEach((categoria, url) -> {
+        sections.forEach((category, url) -> {
             try {
                 Document doc = Jsoup.connect(url).get();
 
-                String titulos = doc.select("h1, h2, h3").text();
-                String contenido = doc.select("p").text();
+                String titles = doc.select("h1, h2, h3").text();
+                String content = doc.select("p").text();
 
-                if (!contenido.isBlank()) {
-                    Conocimiento conocimiento = new Conocimiento();
-                    conocimiento.setCategoria(categoria);
-                    conocimiento.setTitulo(titulos.length() > 100 ? titulos.substring(0, 100) + "..." : titulos);
-                    conocimiento.setContenido(contenido);
-                    conocimiento.setKeywords(List.of(categoria.toLowerCase()));
+                if (!content.isBlank()) {
+                    Knowledge conocimiento = new Knowledge();
+                    conocimiento.setCategory(category);
+                    conocimiento.setTitle(titles.length() > 100 ? titles.substring(0, 100) + "..." : titles);
+                    conocimiento.setContent(content);
+                    conocimiento.setKeywords(List.of(category.toLowerCase()));
 
-                    conocimientoService.save(conocimiento);
-                    System.out.println("Sección '" + categoria + "' guardada desde: " + url);
+                    knowledgeService.save(conocimiento);
+                    System.out.println("Sección '" + category + "' guardada desde: " + url);
                 }
 
             } catch (IOException e) {
@@ -57,13 +57,13 @@ public class WebScraperService {
     }
 
     public void insertManualEntry() {
-        Conocimiento conocimiento = new Conocimiento();
-        conocimiento.setCategoria("Carreras");
-        conocimiento.setTitulo("Ingeniería en Informática");
-        conocimiento.setContenido("La carrera de Ingeniería en Informática forma profesionales altamente capacitados...");
-        conocimiento.setKeywords(List.of("informática", "carrera", "software", "ingeniería"));
+        Knowledge knowledge = new Knowledge();
+        knowledge.setCategory("Carreras");
+        knowledge.setTitle("Ingeniería en Informática");
+        knowledge.setContent("La carrera de Ingeniería en Informática forma profesionales altamente capacitados...");
+        knowledge.setKeywords(List.of("informática", "carrera", "software", "ingeniería"));
 
-        conocimientoService.save(conocimiento);
+        knowledgeService.save(knowledge);
         System.out.println("Conocimiento insertado manualmente.");
     }
 
@@ -85,13 +85,13 @@ public class WebScraperService {
                     continue;
                 }
 
-                Conocimiento conocimiento = new Conocimiento();
-                conocimiento.setCategoria(parts[0]);
-                conocimiento.setTitulo(parts[1]);
-                conocimiento.setContenido(parts[2]);
-                conocimiento.setKeywords(Arrays.asList(parts[3].split(",")));
+                Knowledge knowledge = new Knowledge();
+                knowledge.setCategory(parts[0]);
+                knowledge.setTitle(parts[1]);
+                knowledge.setContent(parts[2]);
+                knowledge.setKeywords(Arrays.asList(parts[3].split(",")));
 
-                conocimientoService.save(conocimiento);
+                knowledgeService.save(knowledge);
             }
 
             System.out.println("Datos cargados desde el CSV correctamente.");

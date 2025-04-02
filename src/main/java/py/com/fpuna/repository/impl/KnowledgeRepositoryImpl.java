@@ -7,15 +7,15 @@ import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
-import py.com.fpuna.model.knowledge.Conocimiento;
+import py.com.fpuna.model.knowledge.Knowledge;
 
 import java.util.ArrayList;
 import java.util.List;
-import py.com.fpuna.repository.ConocimientoRepositoryCustom;
+import py.com.fpuna.repository.KnowledgeRepositoryCustom;
 
 @Repository
 @RequiredArgsConstructor
-public class ConocimientoRepositoryImpl implements ConocimientoRepositoryCustom {
+public class KnowledgeRepositoryImpl implements KnowledgeRepositoryCustom {
 
     private final MongoClient mongoClient;
 
@@ -23,23 +23,23 @@ public class ConocimientoRepositoryImpl implements ConocimientoRepositoryCustom 
     private String databaseName;
 
     @Override
-    public List<Conocimiento> buscarPorContenidoQueContenga(String texto) {
+    public List<Knowledge> findByContentThatHas(String text) {
         MongoDatabase db = mongoClient.getDatabase(databaseName);
-        MongoCollection<Document> collection = db.getCollection("conocimientos");
+        MongoCollection<Document> collection = db.getCollection("knowledge");
 
-        List<Conocimiento> resultados = new ArrayList<>();
+        List<Knowledge> results = new ArrayList<>();
 
-        collection.find(new Document("contenido", new Document("$regex", texto).append("$options", "i")))
+        collection.find(new Document("content", new Document("$regex", text).append("$options", "i")))
                 .forEach(doc -> {
-                    Conocimiento c = new Conocimiento();
+                    Knowledge c = new Knowledge();
                     c.setId(doc.getObjectId("_id").toString());
-                    c.setCategoria(doc.getString("categoria"));
-                    c.setTitulo(doc.getString("titulo"));
-                    c.setContenido(doc.getString("contenido"));
+                    c.setCategory(doc.getString("category"));
+                    c.setTitle(doc.getString("title"));
+                    c.setContent(doc.getString("content"));
                     c.setKeywords((List<String>) doc.get("keywords"));
-                    resultados.add(c);
+                    results.add(c);
                 });
 
-        return resultados;
+        return results;
     }
 }
