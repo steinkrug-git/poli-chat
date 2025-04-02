@@ -12,8 +12,15 @@ public class ChatService {
 
     private final RestTemplate restTemplate;
 
+    private final CategoryService categoryService;
+
+
     public ChatResponse getChatCPTResponse(String prompt) {
 
         return new ChatResponse();
+    }
+
+    public String getFAQByCategory (String prompt){
+        return categoryService.getCategoryFAQ(prompt);
     }
 }
