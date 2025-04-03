@@ -14,7 +14,8 @@ public class ChatService {
 
     private final CategoryService categoryService;
 
-
+    private final SystemMessageService systemMessageService;
+    
     public ChatResponse getChatCPTResponse(String prompt) {
 
         return new ChatResponse();
@@ -22,5 +23,9 @@ public class ChatService {
 
     public String getFAQByCategory (String prompt){
         return categoryService.getCategoryFAQ(prompt);
+    }
+    
+    public String getGreating (){
+        return systemMessageService.getGreeting();
     }
 }

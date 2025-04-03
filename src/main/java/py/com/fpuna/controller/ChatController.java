@@ -6,6 +6,7 @@ import py.com.fpuna.model.response.ChatResponse;
 import py.com.fpuna.service.ChatService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,4 +30,11 @@ public class ChatController {
     public ResponseEntity<String> processCategoryRequest(@PathVariable String name){
         return new ResponseEntity<>(chatService.getFAQByCategory(name), HttpStatus.OK);
     }
+    
+    @GetMapping("/chat/inicio")
+    public ResponseEntity<String> getGreeting(){
+        return new ResponseEntity<>(chatService.getGreating(), HttpStatus.OK);
+        
+    }
+    
 }
