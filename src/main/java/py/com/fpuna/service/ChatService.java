@@ -13,6 +13,8 @@ public class ChatService {
     private final RestTemplate restTemplate;
 
     private final CategoryService categoryService;
+    
+    private final SystemMessageService systemMessageService;
 
 
     public ChatResponse getChatCPTResponse(String prompt) {
@@ -22,5 +24,9 @@ public class ChatService {
 
     public String getFAQByCategory (String prompt){
         return categoryService.getCategoryFAQ(prompt);
+    }
+    
+    public String getGreating() {
+        return systemMessageService.getGreeting();
     }
 }
