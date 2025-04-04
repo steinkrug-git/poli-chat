@@ -4,7 +4,7 @@ package py.com.fpuna.service;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import py.com.fpuna.model.knowledge.SystemMessage;
+import py.com.fpuna.model.collection.SystemMessage;
 import py.com.fpuna.repository.SystemMessageRepository;
 
 @Service

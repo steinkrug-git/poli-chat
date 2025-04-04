@@ -2,7 +2,6 @@ package py.com.fpuna.controller;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import py.com.fpuna.model.request.ChatBotInputRequest;
-import py.com.fpuna.model.response.ChatResponse;
 import py.com.fpuna.service.ChatService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,21 +19,21 @@ public class ChatController {
         this.chatService = chatGPTService;
     }
 
-    @PostMapping("/chat")
-    public ResponseEntity<ChatResponse> processInputRequest(@RequestBody ChatBotInputRequest chatbotInputRequest) {
-        ChatResponse chatCPTResponse = chatService.getChatCPTResponse(chatbotInputRequest.getMessage());
-        return new ResponseEntity<>(chatCPTResponse, HttpStatus.OK);
-    }
-
     @PostMapping("/chat/category/{name}")
-    public ResponseEntity<String> processCategoryRequest(@PathVariable String name){
+    public ResponseEntity<String> processCategoryRequest(@PathVariable String name) {
         return new ResponseEntity<>(chatService.getFAQByCategory(name), HttpStatus.OK);
     }
-    
-    @GetMapping("/chat/inicio")
-    public ResponseEntity<String> getGreeting(){
-        return new ResponseEntity<>(chatService.getGreating(), HttpStatus.OK);
-        
+
+    @PostMapping("/respond")
+    public ResponseEntity<String> processAnswerRequest(@RequestBody ChatBotInputRequest chatbotInputRequest) {
+        String answer = chatService.getAnswer(chatbotInputRequest.getMessage());
+        return new ResponseEntity<>(answer, HttpStatus.OK);
     }
-    
+
+    @GetMapping("/chat/start")
+    public ResponseEntity<String> getGreeting() {
+        return new ResponseEntity<>(chatService.getGreating(), HttpStatus.OK);
+
+    }
+
 }

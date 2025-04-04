@@ -1,8 +1,9 @@
 package py.com.fpuna.service;
 
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import py.com.fpuna.model.knowledge.Knowledge;
+import py.com.fpuna.model.collection.Knowledge;
 
 import java.util.List;
 import py.com.fpuna.repository.KnowledgeRepository;
@@ -13,23 +14,28 @@ public class KnowledgeService {
 
     private final KnowledgeRepository knowledgeRepository;
 
-    public void save(Knowledge knowledge) {
-        knowledgeRepository.save(knowledge);
-    }
+    public String answerFromKnowledge(String userQuestion) {
+        List<Knowledge> matches = knowledgeRepository.findByQuestion(userQuestion);
 
-    public List<Knowledge> findByCategoria(String category) {
-        return knowledgeRepository.findByCategory(category);
-    }
+        if (matches.isEmpty()) {
+            return "Lo siento, no encontré una respuesta para tu consulta 🤔. Probá reformularla o preguntar algo distinto.";
+        }
 
-    public List<Knowledge> findByKeyword(String keyword) {
-        return knowledgeRepository.findByKeywordsContainingIgnoreCase(keyword);
-    }
+        Knowledge bestMatch = matches.get(0);
 
-    public List<Knowledge> findByContenido(String content) {
-        return knowledgeRepository.findByContentThatHas(content);
-    }
+        StringBuilder sb = new StringBuilder();
+        sb.append("").append(bestMatch.getAnswer());
 
-    public List<Knowledge> findAll() {
-        return knowledgeRepository.findAll();
+        if (bestMatch.getLastUpdated() != null) {
+            String fecha = bestMatch.getLastUpdated()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm 'hs'"));
+            sb.append("\n\n* Última actualización de esta información: ").append(fecha);
+        }
+
+        if (bestMatch.getSource() != null && !bestMatch.getSource().isEmpty()) {
+            sb.append("\n* Fuente: ").append(bestMatch.getSource());
+        }
+
+        return sb.toString();
     }
 }

@@ -2,7 +2,7 @@ package py.com.fpuna.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import py.com.fpuna.model.knowledge.Category;
+import py.com.fpuna.model.collection.Category;
 import py.com.fpuna.repository.CategoryRepository;
 
 import java.util.Optional;

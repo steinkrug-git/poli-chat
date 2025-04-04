@@ -1,4 +1,4 @@
-package py.com.fpuna.model.knowledge;
+package py.com.fpuna.model.collection;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

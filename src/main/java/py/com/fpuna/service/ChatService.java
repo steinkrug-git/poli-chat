@@ -3,8 +3,6 @@ package py.com.fpuna.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import py.com.fpuna.model.response.ChatResponse;
-
 
 @Service
 @RequiredArgsConstructor
@@ -15,17 +13,19 @@ public class ChatService {
     private final CategoryService categoryService;
 
     private final SystemMessageService systemMessageService;
-    
-    public ChatResponse getChatCPTResponse(String prompt) {
 
-        return new ChatResponse();
-    }
+    private final KnowledgeService knowledgeService1;
 
-    public String getFAQByCategory (String prompt){
+    public String getFAQByCategory(String prompt) {
         return categoryService.getCategoryFAQ(prompt);
     }
-    
-    public String getGreating (){
+
+    public String getGreating() {
         return systemMessageService.getGreeting();
     }
+
+    public String getAnswer(String question) {
+        return knowledgeService1.answerFromKnowledge(question);
+    }
+
 }
