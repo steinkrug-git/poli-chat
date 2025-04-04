@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD:src/main/java/py/com/fpuna/model/collection/SystemMessage.java
 package py.com.fpuna.model.collection;
+=======
+package py.com.fpuna.model.knowledge;
+>>>>>>> adc081f584648c1072e875763811a175d3691618:src/main/java/py/com/fpuna/model/knowledge/SystemMessage.java
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

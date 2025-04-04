@@ -23,6 +23,7 @@ public class ChatController {
     public ResponseEntity<String> processCategoryRequest(@PathVariable String name) {
         return new ResponseEntity<>(chatService.getFAQByCategory(name), HttpStatus.OK);
     }
+<<<<<<< HEAD
 
     @PostMapping("/respond")
     public ResponseEntity<String> processAnswerRequest(@RequestBody ChatBotInputRequest chatbotInputRequest) {
@@ -31,9 +32,17 @@ public class ChatController {
     }
 
     @GetMapping("/chat/start")
+=======
+    
+    @GetMapping("/chat/inicio")
+>>>>>>> adc081f584648c1072e875763811a175d3691618
     public ResponseEntity<String> getGreeting() {
         return new ResponseEntity<>(chatService.getGreating(), HttpStatus.OK);
 
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> adc081f584648c1072e875763811a175d3691618
 }

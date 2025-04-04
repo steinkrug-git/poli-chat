@@ -11,6 +11,8 @@ public class ChatService {
     private final RestTemplate restTemplate;
 
     private final CategoryService categoryService;
+    
+    private final SystemMessageService systemMessageService;
 
     private final SystemMessageService systemMessageService;
 
@@ -19,6 +21,7 @@ public class ChatService {
     public String getFAQByCategory(String prompt) {
         return categoryService.getCategoryFAQ(prompt);
     }
+<<<<<<< HEAD
 
     public String getGreating() {
         return systemMessageService.getGreeting();
@@ -28,4 +31,10 @@ public class ChatService {
         return knowledgeService1.answerFromKnowledge(question);
     }
 
+=======
+    
+    public String getGreating() {
+        return systemMessageService.getGreeting();
+    }
+>>>>>>> adc081f584648c1072e875763811a175d3691618
 }
