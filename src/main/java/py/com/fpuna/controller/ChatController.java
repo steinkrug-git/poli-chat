@@ -25,7 +25,7 @@ public class ChatController {
     }
 
 
-    @PostMapping("/respond")
+    @PostMapping("/chat/respond")
     public ResponseEntity<String> processAnswerRequest(@RequestBody ChatBotInputRequest chatbotInputRequest) {
         String answer = chatService.getAnswer(chatbotInputRequest.getMessage());
         return new ResponseEntity<>(answer, HttpStatus.OK);

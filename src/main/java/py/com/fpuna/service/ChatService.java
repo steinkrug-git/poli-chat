@@ -14,14 +14,14 @@ public class ChatService {
     
     private final SystemMessageService systemMessageService;
 
-    private final KnowledgeService knowledgeService1;
+    private final KnowledgeService knowledgeService;
 
     public String getFAQByCategory(String prompt) {
         return categoryService.getCategoryFAQ(prompt);
     }
 
     public String getAnswer(String question) {
-        return knowledgeService1.answerFromKnowledge(question);
+        return knowledgeService.answerFromKnowledge(question);
     }
 
     public String getGreeting() {
