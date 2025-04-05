@@ -14,27 +14,17 @@ public class ChatService {
     
     private final SystemMessageService systemMessageService;
 
-    private final SystemMessageService systemMessageService;
-
     private final KnowledgeService knowledgeService1;
 
     public String getFAQByCategory(String prompt) {
         return categoryService.getCategoryFAQ(prompt);
-    }
-<<<<<<< HEAD
-
-    public String getGreating() {
-        return systemMessageService.getGreeting();
     }
 
     public String getAnswer(String question) {
         return knowledgeService1.answerFromKnowledge(question);
     }
 
-=======
-    
-    public String getGreating() {
+    public String getGreeting() {
         return systemMessageService.getGreeting();
     }
->>>>>>> adc081f584648c1072e875763811a175d3691618
 }
