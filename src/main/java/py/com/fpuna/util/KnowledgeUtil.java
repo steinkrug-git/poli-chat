@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import py.com.fpuna.model.collection.Knowledge;
-import py.com.fpuna.model.knowledge.Intent;
+import py.com.fpuna.model.enums.Intent;
 
 /**
  *

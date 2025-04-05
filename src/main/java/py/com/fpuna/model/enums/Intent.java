@@ -1,4 +1,4 @@
-package py.com.fpuna.model.knowledge;
+package py.com.fpuna.model.enums;
 
 import lombok.Getter;
 import java.util.*;
@@ -10,7 +10,8 @@ public enum Intent {
     LUGAR_EXAMEN("lugar_examen"),
     COSTO_INSCRIPCION("costo_inscripcion"),
     CONTENIDO_EXAMEN("contenido_examen"),
-    LUGAR_INSCRIPCION("lugar_inscripcion");
+    LUGAR_INSCRIPCION("lugar_inscripcion"),
+    INICIO_CURSILLO("inicio_cursillo");
 
     private final String value;
 
@@ -42,10 +43,28 @@ public enum Intent {
         keywordToIntentMap.put("materia", CONTENIDO_EXAMEN);
         keywordToIntentMap.put("temas", CONTENIDO_EXAMEN);
         keywordToIntentMap.put("contenido", CONTENIDO_EXAMEN);
+
+        keywordToIntentMap.put("cursillo", INICIO_CURSILLO);
+        keywordToIntentMap.put("inicio", INICIO_CURSILLO);
+        keywordToIntentMap.put("comienzo", INICIO_CURSILLO);
+        keywordToIntentMap.put("empieza", INICIO_CURSILLO);
+        keywordToIntentMap.put("inicia", INICIO_CURSILLO);
+        keywordToIntentMap.put("arranca", INICIO_CURSILLO);
     }
 
     public static Optional<Intent> fromText(String text) {
         String lower = text.toLowerCase();
+
+        if (lower.contains("cursillo") && (
+                lower.contains("cuándo") ||
+                        lower.contains("cuando") ||
+                        lower.contains("inicio") ||
+                        lower.contains("inicia") ||
+                        lower.contains("empieza") ||
+                        lower.contains("arranca"))) {
+            return Optional.of(INICIO_CURSILLO);
+        }
+
         for (Map.Entry<String, Intent> entry : keywordToIntentMap.entrySet()) {
             if (lower.contains(entry.getKey())) {
                 return Optional.of(entry.getValue());

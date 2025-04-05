@@ -54,7 +54,7 @@ public class KnowledgeRepositoryImpl implements KnowledgeRepository {
             return convertAndReturn(docs);
         }
 
-        Document tagQuery = knowledgeUtil.buildTagOnlyQuery(text, intent); // 👇 ahora lo creamos
+        Document tagQuery = knowledgeUtil.buildTagOnlyQuery(text, intent);
         docs = collection.find(tagQuery).into(new ArrayList<>());
 
         return docs.stream()
