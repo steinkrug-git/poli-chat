@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import py.com.fpuna.cache.CachedIntent;
 import py.com.fpuna.model.collection.IntentDocument;
 import py.com.fpuna.repository.IntentRepository;
 
@@ -20,15 +21,23 @@ public class IntentRepositoryImpl implements IntentRepository {
     @Autowired
     private MongoClient mongoClient;
 
+    @Autowired
+    private CachedIntent cache;
+
     @Value("${spring.data.mongodb.database}")
     private String databaseName;
 
     @Override
     public List<IntentDocument> findAllOrderedByPriority() {
+
+        if (!cache.isExpired()){
+            return cache.getValue();
+        }
+
         MongoDatabase db = mongoClient.getDatabase(databaseName);
         MongoCollection<Document> collection = db.getCollection("intents");
 
-        return collection.find()
+        List<IntentDocument> result = collection.find()
                 .sort(Sorts.ascending("priority"))
                 .map(doc -> {
                     IntentDocument intent = new IntentDocument();
@@ -40,5 +49,8 @@ public class IntentRepositoryImpl implements IntentRepository {
                     return intent;
                 })
                 .into(new ArrayList<>());
+
+        cache.update(result);
+        return result;
     }
 }
