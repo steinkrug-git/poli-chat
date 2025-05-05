@@ -7,12 +7,15 @@ import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import py.com.fpuna.model.collection.IntentDocument;
 import py.com.fpuna.model.collection.Knowledge;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import py.com.fpuna.repository.KnowledgeRepository;
 import py.com.fpuna.util.KnowledgeUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,7 +34,8 @@ public class KnowledgeRepositoryImpl implements KnowledgeRepository {
         MongoDatabase db = mongoClient.getDatabase(databaseName);
         MongoCollection<Document> collection = db.getCollection("knowledge");
 
-        String intent = knowledgeUtil.detectIntent(text);
+        Optional<IntentDocument> optionalIntent = knowledgeUtil.detectIntentFromDb(text);
+        String intent = optionalIntent.map(IntentDocument::getName).orElse(null);
         Set<String> userWords = knowledgeUtil.cleanAndSplitWords(text);
 
         Document queryQuestion = new Document("question", knowledgeUtil.regexQuery(text));

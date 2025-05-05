@@ -1,16 +1,17 @@
 package py.com.fpuna.util;
 
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import py.com.fpuna.model.collection.IntentDocument;
+import py.com.fpuna.model.collection.Knowledge;
+import py.com.fpuna.repository.IntentRepository;
+
+import java.text.Normalizer;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
-import org.bson.Document;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Component;
-import py.com.fpuna.model.collection.Knowledge;
-import py.com.fpuna.model.enums.Intent;
 
 /**
  *
@@ -19,12 +20,15 @@ import py.com.fpuna.model.enums.Intent;
 @Component
 public class KnowledgeUtil {
 
+    @Autowired
+    private IntentRepository intentRepository;
+
     public Document buildQuery(String text, String intent) {
         final Document questionFilter = new Document("question", regexQuery(text));
         final Document similarFilter = new Document("similar_questions", new Document("$elemMatch", regexQuery(text)));
 
         final List<Document> tagFilters = new ArrayList<>();
-        for (String word : text.split("\\s+")) {
+        for (String word : cleanAndSplitWords(text)) {
             tagFilters.add(new Document("tags", new Document("$elemMatch", regexQuery(word))));
         }
 
@@ -44,7 +48,6 @@ public class KnowledgeUtil {
 
     public Knowledge convertToKnowledge(Document doc) {
         final Knowledge detail = new Knowledge();
-
         detail.setId(doc.getObjectId("_id").toString());
         detail.setCategory(doc.getString("category"));
         detail.setSubcategory(doc.getString("sub_category"));
@@ -65,10 +68,20 @@ public class KnowledgeUtil {
         return detail;
     }
 
-    public String detectIntent(String text) {
-        return Intent.fromText(text)
-                .map(Intent::getValue)
-                .orElse(null);
+    public Optional<IntentDocument> detectIntentFromDb(String text) {
+        Set<String> words = cleanAndSplitWords(text);
+        List<IntentDocument> intents = intentRepository.findAllOrderedByPriority();
+
+        for (IntentDocument intent : intents) {
+            boolean required = intent.getKeywordsRequired().stream().allMatch(words::contains);
+            boolean optional = intent.getKeywordsOptional().isEmpty()
+                    || intent.getKeywordsOptional().stream().anyMatch(words::contains);
+
+            if (required && optional) {
+                return Optional.of(intent);
+            }
+        }
+        return Optional.empty();
     }
 
     public int countTagMatches(Document doc, Set<String> userWords) {
@@ -83,12 +96,16 @@ public class KnowledgeUtil {
                 }
             }
         }
-
         return matches;
     }
 
     public Set<String> cleanAndSplitWords(String text) {
-        return Arrays.stream(text.toLowerCase().replaceAll("[^\\p{L}\\p{Nd}\\s]+", "").split("\\s+"))
+        String normalized = Normalizer.normalize(text, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase()
+                .replaceAll("[^\\p{L}\\p{Nd}\\s]+", "");
+
+        return Arrays.stream(normalized.split("\\s+"))
                 .filter(word -> !word.isBlank())
                 .collect(Collectors.toSet());
     }
@@ -103,7 +120,6 @@ public class KnowledgeUtil {
         if (intent != null && !intent.isEmpty()) {
             return new Document("$and", List.of(baseQuery, new Document("intent", intent)));
         }
-
         return baseQuery;
     }
 
