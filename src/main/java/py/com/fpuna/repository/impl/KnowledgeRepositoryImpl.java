@@ -27,7 +27,7 @@ public class KnowledgeRepositoryImpl implements KnowledgeRepository {
     @Value("${spring.data.mongodb.database}")
     private String databaseName;
 
-    private static final int MIN_TAG_MATCHES = 0;
+    private static final int MIN_SCORE = 3;
 
     @Override
     public List<Knowledge> findByQuestion(String text) {
@@ -44,8 +44,9 @@ public class KnowledgeRepositoryImpl implements KnowledgeRepository {
 
         return docs.stream()
                 .sorted((a, b) -> Integer.compare(
-                knowledgeUtil.countMatchScore(b, userWords),
-                knowledgeUtil.countMatchScore(a, userWords)))
+                knowledgeUtil.countMatchScore(b, userWords, intent),
+                knowledgeUtil.countMatchScore(a, userWords, intent)))
+                .filter(doc -> knowledgeUtil.countMatchScore(doc, userWords, intent) >= MIN_SCORE)
                 .map(knowledgeUtil::convertToKnowledge)
                 .toList();
     }

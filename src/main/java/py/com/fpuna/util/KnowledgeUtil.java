@@ -20,6 +20,10 @@ import java.util.stream.Collectors;
 @Component
 public class KnowledgeUtil {
 
+    private static final Set<String> STOPWORDS = Set.of(
+            "de", "el", "la", "en", "y", "a", "del", "los", "las", "un", "una", "para", "es", "al"
+    );
+
     @Autowired
     private IntentRepository intentRepository;
 
@@ -69,92 +73,74 @@ public class KnowledgeUtil {
     }
 
     public Optional<IntentDocument> detectIntentFromDb(String text) {
+        IntentDocument bestIntent = null;
+        Long bestScore = 0L;
+
         Set<String> words = cleanAndSplitWords(text);
         List<IntentDocument> intents = intentRepository.findAllOrderedByPriority();
 
         for (IntentDocument intent : intents) {
-            boolean required = intent.getKeywordsRequired().stream().allMatch(words::contains);
-            boolean optional = intent.getKeywordsOptional().isEmpty()
-                    || intent.getKeywordsOptional().stream().anyMatch(words::contains);
+            Set<String> requiredKeywords = intent.getKeywordsRequired().stream()
+                    .map(KnowledgeUtil::cleanWord)
+                    .collect(Collectors.toSet());
 
-            if (required && optional) {
-                return Optional.of(intent);
+            Set<String> optionalKeywords = intent.getKeywordsOptional().stream()
+                    .map(KnowledgeUtil::cleanWord)
+                    .collect(Collectors.toSet());
+
+            if (!requiredKeywords.stream().allMatch(words::contains)) continue;
+
+            Long score = optionalKeywords.stream()
+                    .filter(words::contains)
+                    .count();
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestIntent = intent;
             }
         }
-        return Optional.empty();
+
+        return Optional.ofNullable(bestIntent);
     }
 
-//    public int countTagMatches(Document doc, Set<String> userWords) {
-//        List<String> tags = (List<String>) doc.get("tags");
-//        int matches = 0;
-//
-//        for (String tag : tags) {
-//            for (String word : userWords) {
-//                if (tag.toLowerCase().contains(word)) {
-//                    matches++;
-//                    break;
-//                }
-//            }
-//        }
-//        return matches;
-//    }
-
     public Set<String> cleanAndSplitWords(String text) {
-        String normalized = Normalizer.normalize(text, Normalizer.Form.NFD)
-                .replaceAll("\\p{M}", "")
-                .toLowerCase()
-                .replaceAll("[^\\p{L}\\p{Nd}\\s]+", "");
-
-        return Arrays.stream(normalized.split("\\s+"))
-                .filter(word -> !word.isBlank())
+        return Arrays.stream(text.split("\\s+"))
+                .map(KnowledgeUtil::cleanWord)
+                .filter(word -> !word.isBlank() && !STOPWORDS.contains(word))
                 .collect(Collectors.toSet());
     }
 
-    public Document buildTagOnlyQuery(String text, String intent) {
-        final List<Document> tagFilters = new ArrayList<>();
-        for (String word : cleanAndSplitWords(text)) {
-            tagFilters.add(new Document("tags", new Document("$elemMatch", regexQuery(word))));
-        }
-
-        final Document baseQuery = new Document("$or", tagFilters);
-        if (intent != null && !intent.isEmpty()) {
-            return new Document("$and", List.of(baseQuery, new Document("intent", intent)));
-        }
-        return baseQuery;
+    public static String cleanWord(String word) {
+        return Normalizer.normalize(word, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase()
+                .replaceAll("[^\\p{L}\\p{Nd}\\s]+", "");
     }
 
     public Document regexQuery(String text) {
         return new Document("$regex", text).append("$options", "i");
     }
 
-    public int countMatchScore(Document doc, Set<String> userWords) {
+    public int countMatchScore(Document doc, Set<String> userWords, String detectedIntent) {
         int score = 0;
 
-        // Comparar con la pregunta principal (peso 2)
-        String question = doc.getString("question");
-        if (question != null) {
-            Set<String> questionWords = cleanAndSplitWords(question);
-            for (String word : userWords) {
-                if (questionWords.contains(word)) {
-                    score += 2;
-                }
-            }
-        }
+        score += getScoreFromQuestion(doc, userWords, score);
+        score += getScoreFromSimilarQuestions(doc, userWords, score);
+        score += getScoreFromTags(doc, userWords, score);
+        score += getScoreFromIntent(doc, detectedIntent, score);
 
-        // Comparar con similar_questions (peso 1)
-        List<String> similarQuestions = (List<String>) doc.get("similar_questions");
-        if (similarQuestions != null) {
-            for (String similar : similarQuestions) {
-                Set<String> similarWords = cleanAndSplitWords(similar);
-                for (String word : userWords) {
-                    if (similarWords.contains(word)) {
-                        score += 1;
-                    }
-                }
-            }
-        }
+        return score;
+    }
 
-        // Comparar con tags (peso 1)
+    private static int getScoreFromIntent(Document doc, String detectedIntent, int score) {
+        String docIntent = doc.getString("intent");
+        if (docIntent != null && docIntent.equalsIgnoreCase(detectedIntent)) {
+            score += 20;
+        }
+        return score;
+    }
+
+    private int getScoreFromTags(Document doc, Set<String> userWords, int score) {
         List<String> tags = (List<String>) doc.get("tags");
         if (tags != null) {
             for (String tag : tags) {
@@ -167,9 +153,34 @@ public class KnowledgeUtil {
                 }
             }
         }
-
         return score;
     }
 
+    private int getScoreFromSimilarQuestions(Document doc, Set<String> userWords, int score) {
+        List<String> similarQuestions = (List<String>) doc.get("similar_questions");
+        if (similarQuestions != null) {
+            for (String similar : similarQuestions) {
+                Set<String> similarWords = cleanAndSplitWords(similar);
+                for (String word : userWords) {
+                    if (similarWords.contains(word)) {
+                        score += 1;
+                    }
+                }
+            }
+        }
+        return score;
+    }
 
+    private int getScoreFromQuestion(Document doc, Set<String> userWords, int score) {
+        String question = doc.getString("question");
+        if (question != null) {
+            Set<String> questionWords = cleanAndSplitWords(question);
+            for (String word : userWords) {
+                if (questionWords.contains(word)) {
+                    score += 2;
+                }
+            }
+        }
+        return score;
+    }
 }
