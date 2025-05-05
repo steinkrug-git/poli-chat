@@ -84,20 +84,20 @@ public class KnowledgeUtil {
         return Optional.empty();
     }
 
-    public int countTagMatches(Document doc, Set<String> userWords) {
-        List<String> tags = (List<String>) doc.get("tags");
-        int matches = 0;
-
-        for (String tag : tags) {
-            for (String word : userWords) {
-                if (tag.toLowerCase().contains(word)) {
-                    matches++;
-                    break;
-                }
-            }
-        }
-        return matches;
-    }
+//    public int countTagMatches(Document doc, Set<String> userWords) {
+//        List<String> tags = (List<String>) doc.get("tags");
+//        int matches = 0;
+//
+//        for (String tag : tags) {
+//            for (String word : userWords) {
+//                if (tag.toLowerCase().contains(word)) {
+//                    matches++;
+//                    break;
+//                }
+//            }
+//        }
+//        return matches;
+//    }
 
     public Set<String> cleanAndSplitWords(String text) {
         String normalized = Normalizer.normalize(text, Normalizer.Form.NFD)
@@ -126,5 +126,50 @@ public class KnowledgeUtil {
     public Document regexQuery(String text) {
         return new Document("$regex", text).append("$options", "i");
     }
+
+    public int countMatchScore(Document doc, Set<String> userWords) {
+        int score = 0;
+
+        // Comparar con la pregunta principal (peso 2)
+        String question = doc.getString("question");
+        if (question != null) {
+            Set<String> questionWords = cleanAndSplitWords(question);
+            for (String word : userWords) {
+                if (questionWords.contains(word)) {
+                    score += 2;
+                }
+            }
+        }
+
+        // Comparar con similar_questions (peso 1)
+        List<String> similarQuestions = (List<String>) doc.get("similar_questions");
+        if (similarQuestions != null) {
+            for (String similar : similarQuestions) {
+                Set<String> similarWords = cleanAndSplitWords(similar);
+                for (String word : userWords) {
+                    if (similarWords.contains(word)) {
+                        score += 1;
+                    }
+                }
+            }
+        }
+
+        // Comparar con tags (peso 1)
+        List<String> tags = (List<String>) doc.get("tags");
+        if (tags != null) {
+            for (String tag : tags) {
+                Set<String> tagWords = cleanAndSplitWords(tag);
+                for (String word : userWords) {
+                    if (tagWords.contains(word)) {
+                        score += 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return score;
+    }
+
 
 }
