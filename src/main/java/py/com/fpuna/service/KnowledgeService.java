@@ -29,7 +29,7 @@ public class KnowledgeService {
         if (bestMatch.getLastUpdated() != null) {
             String fecha = bestMatch.getLastUpdated()
                 .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm 'hs'"));
-            sb.append("\n\n* Última actualización de esta información: ").append(fecha);
+            sb.append("\n\n* Última actualización de esta información: ").append(fecha); //FALTA VER POR QUÉ NO TRAE FECHA EN MARKETING
         }
 
         if (bestMatch.getSource() != null && !bestMatch.getSource().isEmpty()) {
