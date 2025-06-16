@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class KnowledgeUtil {
 
     private static final Set<String> STOPWORDS = Set.of(
-            "de", "el", "la", "en", "y", "a", "del", "los", "las", "un", "una", "para", "es", "al"
+            "de", "el", "la", "en", "y", "a", "del", "los", "las", "un", "una", "es", "al"
     );
 
     @Autowired
