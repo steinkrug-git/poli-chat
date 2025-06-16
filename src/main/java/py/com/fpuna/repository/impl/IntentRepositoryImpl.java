@@ -35,7 +35,7 @@ public class IntentRepositoryImpl implements IntentRepository {
         }
 
         MongoDatabase db = mongoClient.getDatabase(databaseName);
-        MongoCollection<Document> collection = db.getCollection("intents");
+        MongoCollection<Document> collection = db.getCollection("intent");
 
         List<IntentDocument> result = collection.find()
                 .sort(Sorts.ascending("priority"))

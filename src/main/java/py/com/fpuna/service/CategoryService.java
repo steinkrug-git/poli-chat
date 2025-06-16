@@ -23,13 +23,9 @@ public class CategoryService {
         Category category = catOpt.get();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Oh, elegiste ").append(category.getName().toLowerCase()).append(", algunas preguntas frecuentes suelen ser:\n\n");
-
         category.getFrequentlyAskedQuestions().forEach(pregunta -> {
             sb.append(pregunta).append("\n");
         });
-
-        sb.append("\nSelecciona o formula tu propia duda 👀");
 
         return sb.toString();
     }

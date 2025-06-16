@@ -27,7 +27,7 @@ public class KnowledgeRepositoryImpl implements KnowledgeRepository {
     @Value("${spring.data.mongodb.database}")
     private String databaseName;
 
-    private static final int MIN_TAG_MATCHES = 0;
+    private static final int MIN_SCORE = 3;
 
     @Override
     public List<Knowledge> findByQuestion(String text) {
@@ -38,34 +38,15 @@ public class KnowledgeRepositoryImpl implements KnowledgeRepository {
         String intent = optionalIntent.map(IntentDocument::getName).orElse(null);
         Set<String> userWords = knowledgeUtil.cleanAndSplitWords(text);
 
-        Document queryQuestion = new Document("question", knowledgeUtil.regexQuery(text));
-        if (intent != null) {
-            queryQuestion = new Document("$and", List.of(queryQuestion, new Document("intent", intent)));
-        }
+        Document query = knowledgeUtil.buildQuery(text, intent);
 
-        List<Document> docs = collection.find(queryQuestion).into(new ArrayList<>());
-        if (!docs.isEmpty()) {
-            return convertAndReturn(docs);
-        }
-
-        Document querySimilar = new Document("similar_questions", new Document("$elemMatch", knowledgeUtil.regexQuery(text)));
-        if (intent != null) {
-            querySimilar = new Document("$and", List.of(querySimilar, new Document("intent", intent)));
-        }
-
-        docs = collection.find(querySimilar).into(new ArrayList<>());
-        if (!docs.isEmpty()) {
-            return convertAndReturn(docs);
-        }
-
-        Document tagQuery = knowledgeUtil.buildTagOnlyQuery(text, intent);
-        docs = collection.find(tagQuery).into(new ArrayList<>());
+        List<Document> docs = collection.find(query).into(new ArrayList<>());
 
         return docs.stream()
                 .sorted((a, b) -> Integer.compare(
-                knowledgeUtil.countTagMatches(b, userWords),
-                knowledgeUtil.countTagMatches(a, userWords)))
-                .filter(doc -> knowledgeUtil.countTagMatches(doc, userWords) >= MIN_TAG_MATCHES)
+                knowledgeUtil.countMatchScore(b, userWords, intent),
+                knowledgeUtil.countMatchScore(a, userWords, intent)))
+                .filter(doc -> knowledgeUtil.countMatchScore(doc, userWords, intent) >= MIN_SCORE)
                 .map(knowledgeUtil::convertToKnowledge)
                 .toList();
     }
